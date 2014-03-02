@@ -1,67 +1,35 @@
 package com.varel.photo_editor.fragments;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.*;
 import android.widget.ImageView;
-import android.widget.Toast;
 import com.varel.photo_editor.R;
-import com.varel.photo_editor.libs.ImageFilters;
-
+import com.varel.photo_editor.abstract_libs.ImageFragment;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
-public class FiltersEditorFragment extends Fragment implements View.OnClickListener, View.OnLongClickListener{
-
-   View.OnClickListener onClickListener;
-   View.OnLongClickListener onLongClickListener;
-   private Bitmap imageBitmap;
-   private Bitmap imageBitmap_;
-   private Bitmap imageBitmap_active;
-   private ImageFilters imageFilters = new ImageFilters();
-   List<Bitmap> imagesEffectSave;
-   List<Integer> imagesEffectSaveIndex;
-   private ImageView imageView;
-
-   private int MAX_WIDTH_IMAGE = 1024;
-   private int MAX_HEIGHT_IMAGE = 1024;
-   private String TAG = "TAG_ID";
-   private boolean isAddImage = false;
-   private boolean isBorder = false;
-   private boolean isGaussian = false;
-   private boolean isLight = false;
-   private float isRotate = 0;
-   private String folderApplication = Environment.getExternalStorageDirectory() + "/PhotoEditor/";
+public class FiltersEditorFragment extends ImageFragment implements View.OnClickListener, View.OnLongClickListener{
 
    public static final int ID_MENU_GET_IMAGE = 100;
    public static final int ID_MENU_SAVE_IMAGE = 200;
    public static final int ID_MENU_ROTATE = 300;
    public static final int ID_MENU_BUTTON_CAMERA = 101;
    public static final int ID_MENU_BUTTON_GALLERY = 102;
+   public static final int ID_MENU_BUTTON_SAVE = 201;
    public static final int ID_MENU_BUTTON_ROTATE_NONE = 301;
    public static final int ID_MENU_BUTTON_ROTATE_90 = 302;
    public static final int ID_MENU_BUTTON_ROTATE_180 = 303;
    public static final int ID_MENU_BUTTON_ROTATE_270 = 304;
-
-   public static final int ID_MENU_BUTTON_SAVE = 201;
 
    @Override
    public void onCreate(Bundle savedInstanceState) {
@@ -89,7 +57,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_real:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -105,7 +74,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_tint:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -122,7 +92,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_sheding_yellow:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -138,7 +109,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_grayscale:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -154,7 +126,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_sheding_cyan:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -170,7 +143,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_sepia_green:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -186,7 +160,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_sepia_blue:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -202,7 +177,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_sepia:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -218,7 +194,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_round_corner:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -234,7 +211,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_invert:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -250,7 +228,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_flea:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -266,7 +245,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_engrave:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -282,7 +262,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_emboss:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -298,7 +279,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_contrast:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -314,7 +296,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_color_green:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -330,7 +313,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_brightness:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -346,7 +330,8 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
             break;
 
          case R.id.button_effect_black:
-            new AsyncTasks() {
+            updateFiltersButtons(isActiveFilters, ID);
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   try {
                      imageBitmap_ = imagesEffectSave.get(imagesEffectSaveIndex.indexOf(ID));
@@ -366,7 +351,7 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
          case R.id.button_top_effect_border:
             isBorder = !isBorder;
             updateActiveTopNav();
-            new AsyncTasks() {
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   updateImageToView(imageBitmap_);
                }
@@ -376,7 +361,7 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
          case R.id.button_top_effect_gaussian:
             isGaussian = !isGaussian;
             updateActiveTopNav();
-            new AsyncTasks() {
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   updateImageToView(imageBitmap_);
                }
@@ -386,7 +371,7 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
          case R.id.button_top_effect_light:
             isLight = !isLight;
             updateActiveTopNav();
-            new AsyncTasks() {
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   updateImageToView(imageBitmap_);
                }
@@ -416,39 +401,6 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
 
       }
       return true;
-   }
-
-   public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
-      super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
-      imagesEffectSave = new ArrayList<Bitmap>();
-      imagesEffectSaveIndex = new ArrayList<Integer>();
-      switch(requestCode) {
-         case 0:
-            if (resultCode == Activity.RESULT_OK) {
-               Bundle extras = imageReturnedIntent.getExtras();
-               imageBitmap_ = imageBitmap = reSizeImage((Bitmap) extras.get("data"));
-               updateImageToView(imageBitmap_);
-               setImage();
-            }
-
-            break;
-
-         case 1:
-            if(resultCode == Activity.RESULT_OK){
-               Uri selectedImage = imageReturnedIntent.getData();
-               String[] filePathColumn = {MediaStore.Images.Media.DATA};
-               Cursor cursor = getActivity().getContentResolver().query(selectedImage, filePathColumn, null, null, null);
-               cursor.moveToFirst();
-               int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
-               String filePath = cursor.getString(columnIndex);
-               cursor.close();
-
-               imageBitmap_ = imageBitmap = reSizeImage(BitmapFactory.decodeFile(filePath));
-               updateImageToView(imageBitmap_);
-               setImage();
-            }
-            break;
-      }
    }
 
    @Override
@@ -494,7 +446,7 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
          case ID_MENU_BUTTON_ROTATE_NONE:
             isRotate = 0;
             updateActiveTopNav();
-            new AsyncTasks() {
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   updateImageToView(imageBitmap_);
                }
@@ -504,7 +456,7 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
          case ID_MENU_BUTTON_ROTATE_90:
             isRotate = 90;
             updateActiveTopNav();
-            new AsyncTasks() {
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   updateImageToView(imageBitmap_);
                }
@@ -514,7 +466,7 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
          case ID_MENU_BUTTON_ROTATE_180:
             isRotate = 180;
             updateActiveTopNav();
-            new AsyncTasks() {
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   updateImageToView(imageBitmap_);
                }
@@ -524,7 +476,7 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
          case ID_MENU_BUTTON_ROTATE_270:
             isRotate = 270;
             updateActiveTopNav();
-            new AsyncTasks() {
+            new ApplyFiltersTasks() {
                protected void doingInBackground() {
                   updateImageToView(imageBitmap_);
                }
@@ -541,6 +493,14 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
    @Override
    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
       super.onCreateOptionsMenu(menu, inflater);
+   }
+
+   @Override
+   public void onActivityResult(int requestCode, int resultCode, Intent imageReturnedIntent) {
+      super.onActivityResult(requestCode, resultCode, imageReturnedIntent);
+      if(requestCode == 0 || requestCode == 1) {
+         updateFiltersButtons(0, R.id.button_effect_real);
+      }
    }
 
    private void updateActiveTopNav() {
@@ -584,6 +544,31 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
                       r.getColor(R.color.background_top_button_active) :
                       r.getColor(R.color.background_top_button)
       );
+   }
+
+   private void updateFiltersButtons(int oldActive, int newActive) {
+      Resources r = getResources();
+      isActiveFilters = newActive;
+      try {
+         if(oldActive != 0) {
+            getView().findViewById(oldActive).setBackgroundColor(
+                    r.getColor(R.color.background_effects_buttons)
+            );
+         }
+
+      } catch (Error e) {
+         Log.e("ERROR:", e.toString());
+      }
+
+      try {
+         if(newActive != 0) {
+            getView().findViewById(newActive).setBackgroundColor(
+                    r.getColor(R.color.background_effects_buttons_active)
+            );
+         }
+      } catch (Error e) {
+         Log.e("ERROR:", e.toString());
+      }
    }
 
    public static FiltersEditorFragment newInstance() {
@@ -630,113 +615,4 @@ public class FiltersEditorFragment extends Fragment implements View.OnClickListe
       view.findViewById(R.id.layout_top_effect_rotate).setOnCreateContextMenuListener(this);
    }
 
-   private void updateImageToView(Bitmap pImageBitmap) {
-      if(pImageBitmap != null) {
-         if(isGaussian) {
-            double[][] GaussianBlurConfig = new double[][] {
-                    { 2, 2, 2 },
-                    { 2, 0, 2 },
-                    { 2, 2, 2 }
-            };
-            pImageBitmap = imageFilters.applyGaussianBlurEffect(pImageBitmap, GaussianBlurConfig);
-         }
-
-         if(isLight) {
-            pImageBitmap = imageFilters.applyBrightnessEffect(pImageBitmap, 70);
-         }
-
-         if(isRotate != 0) {
-            pImageBitmap = imageFilters.applyRotateEffect(pImageBitmap, isRotate);
-         }
-
-         if(isBorder) {
-            pImageBitmap = imageFilters.applySimpleBorder(pImageBitmap, getActivity(), 0.1f);
-         }
-      }
-      imageBitmap_active = pImageBitmap;
-   }
-
-   private void setImage() {
-      if(imageBitmap_active !=  null) {
-         isAddImage = true;
-         imageView.setImageBitmap(imageBitmap_active);
-      }
-   }
-
-   private void saveImage() {
-      if(isAddImage) {
-         new AsyncTasks("Сохранение фотографии") {
-            protected void doingInBackground() {
-               try {
-                  String name = "file_" + (new DateFormat().format("s_m_k_dd_MM_yyyy", new Date()).toString()) + ".png";
-                  File filename = new File(folderApplication, name);
-                  FileOutputStream out = new FileOutputStream(filename);
-                  Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-                  bitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
-                  out.close();
-               } catch (Exception e) {
-                  e.printStackTrace();
-               }
-            }
-            protected void doingAfter() {
-               Toast.makeText(getActivity(), "Фотография сохранена.", Toast.LENGTH_SHORT).show();
-            }
-         }.execute();
-      }
-   }
-
-   private Bitmap reSizeImage(Bitmap image) {
-      int height = image.getHeight();
-      int width = image.getWidth();
-      if(height > MAX_HEIGHT_IMAGE || width > MAX_WIDTH_IMAGE) {
-         float koef = (float) height / (float) width;
-         int newWidth = 0;
-         int newHeight = 0;
-         if(height > width) {
-            newHeight = MAX_HEIGHT_IMAGE;
-            newWidth = (int) (newHeight / koef);
-         } else {
-            newWidth = MAX_WIDTH_IMAGE;
-            newHeight = (int) (newWidth * koef);
-         }
-         Log.d(TAG, "height=" + height + "; width=" + width + "; koef=" + koef);
-         Log.d(TAG, "newWidth="+newWidth+"; newHeight="+newHeight);
-         return Bitmap.createScaledBitmap(image, newWidth, newHeight, true);
-      } else {
-         return image;
-      }
-   }
-
-   private abstract class AsyncTasks extends AsyncTask<Void, Void, String> {
-      private ProgressDialog dialog;
-      protected abstract void doingInBackground();
-      protected void doingAfter() {};
-      private String textShow = "";
-
-      public AsyncTasks() {
-         textShow = getString(R.string.loader_text_wait);
-      }
-
-      public AsyncTasks(String pText) {
-         textShow = pText;
-      }
-
-      @Override
-      protected void onPreExecute() {
-         dialog = ProgressDialog.show(getActivity(), "", textShow, true);
-      }
-
-      @Override
-      protected String doInBackground(Void... params) {
-         doingInBackground();
-         return "";
-      }
-
-      @Override
-      protected void onPostExecute(String result) {
-         dialog.dismiss();
-         setImage();
-         doingAfter();
-      }
-   }
 }

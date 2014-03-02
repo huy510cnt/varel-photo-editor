@@ -1,8 +1,6 @@
 package com.varel.photo_editor.fragments;
 
-
 import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,9 +8,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import com.varel.photo_editor.R;
+import com.varel.photo_editor.abstract_libs.ImageFragment;
 import com.varel.photo_editor.activities.FiltersEditorActivity;
+import com.varel.photo_editor.activities.SquareActivity;
 
-public class MainFragment extends Fragment {
+public class MainFragment extends ImageFragment {
 
    private Button ButtonCreateSquare;
    private Button ButtonCreateFilters;
@@ -29,7 +29,8 @@ public class MainFragment extends Fragment {
       ButtonCreateSquare = (Button) v.findViewById(R.id.button_create_square);
       ButtonCreateSquare.setOnClickListener(new View.OnClickListener() {
          public void onClick(View v) {
-
+            Intent i = new Intent(getActivity(), SquareActivity.class);
+            startActivity(i);
          }
       });
 
@@ -37,7 +38,6 @@ public class MainFragment extends Fragment {
       ButtonCreateFilters.setOnClickListener(new View.OnClickListener() {
          public void onClick(View v) {
             Intent i = new Intent(getActivity(), FiltersEditorActivity.class);
-            //i.putExtra(CrimeFragment.EXTRA_CRIME_ID, c.getId());
             startActivity(i);
          }
       });
