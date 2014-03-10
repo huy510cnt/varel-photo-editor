@@ -52,7 +52,7 @@ public class ConvolutionMatrix {
             // get alpha of center pixel
             A = Color.alpha(pixels[1][1]);
 
-            // init color sum
+            // initActionBar color sum
             sumR = sumG = sumB = 0;
 
             // get sum of RGB on matrix
