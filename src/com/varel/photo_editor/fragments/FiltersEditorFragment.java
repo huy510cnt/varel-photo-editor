@@ -1,24 +1,33 @@
 package com.varel.photo_editor.fragments;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.NavUtils;
+import android.support.v4.app.TaskStackBuilder;
 import android.util.Log;
 import android.view.*;
 import android.widget.ImageView;
 import com.varel.photo_editor.R;
 import com.varel.photo_editor.abstract_libs.ImageFragment;
+import com.varel.photo_editor.activities.MainActivity;
+
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 
 public class FiltersEditorFragment extends ImageFragment implements View.OnClickListener, View.OnLongClickListener{
+
+   public static final String ID_SAVED_INSTANCE_STATE_BITMAP = "com.varel.photo_editor.fragments.binmap";
+   public static final String ID_SAVED_INSTANCE_STATE_BORDER = "com.varel.photo_editor.fragments.isBorder";
+   public static final String ID_SAVED_INSTANCE_STATE_GAUSSIAN = "com.varel.photo_editor.fragments.isGaussian";
+   public static final String ID_SAVED_INSTANCE_STATE_LIGHT = "com.varel.photo_editor.fragments.isLight";
+   public static final String ID_SAVED_INSTANCE_STATE_ROTATE = "com.varel.photo_editor.fragments.isRotate";
+   public static final String ID_SAVED_INSTANCE_STATE_FILTER = "com.varel.photo_editor.fragments.activeFilter";
 
    public static final int ID_MENU_GET_IMAGE = 100;
    public static final int ID_MENU_SAVE_IMAGE = 200;
@@ -34,19 +43,74 @@ public class FiltersEditorFragment extends ImageFragment implements View.OnClick
    @Override
    public void onCreate(Bundle savedInstanceState) {
       super.onCreate(savedInstanceState);
+      actionBar = getActivity().getActionBar();
+      actionBar.setHomeButtonEnabled(true);
+      actionBar.setTitle(R.string.activity_title_editor);
+      setHasOptionsMenu(true);
+
       File wallpaperDirectory = new File(folderApplication);
       if(!wallpaperDirectory.exists()) { wallpaperDirectory.mkdirs(); }
 
       imagesEffectSave = new ArrayList<Bitmap>();
       imagesEffectSaveIndex = new ArrayList<Integer>();
+
+      Bundle bundle = getArguments();
+      if(bundle != null) {
+         byte [] img_tmp = bundle.getByteArray(ID_SAVED_INSTANCE_STATE_BITMAP);
+         imageBitmap = imageBitmap_ = imageBitmap_active = (Bitmap) BitmapFactory.decodeByteArray(img_tmp , 0, img_tmp.length);
+      }
    }
 
    @Override
    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
       View v = inflater.inflate(R.layout.filters_fragment, parent, false);
       setVariables(v);
-
       return v;
+   }
+
+   @Override
+   public void onSaveInstanceState(Bundle outState) {
+      super.onSaveInstanceState(outState);
+      ByteArrayOutputStream stream = new ByteArrayOutputStream();
+      imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+      outState.putByteArray(ID_SAVED_INSTANCE_STATE_BITMAP, stream.toByteArray());
+      outState.putBoolean(ID_SAVED_INSTANCE_STATE_BORDER, isBorder);
+      outState.putBoolean(ID_SAVED_INSTANCE_STATE_LIGHT, isLight);
+      outState.putBoolean(ID_SAVED_INSTANCE_STATE_GAUSSIAN, isGaussian);
+      outState.putFloat(ID_SAVED_INSTANCE_STATE_ROTATE, isRotate);
+      outState.putInt(ID_SAVED_INSTANCE_STATE_FILTER, isActiveFilters);
+   }
+
+   public void onActivityCreated(Bundle savedInstanceState) {
+      super.onActivityCreated(savedInstanceState);
+      if (savedInstanceState != null) {
+         byte [] img_tmp = savedInstanceState.getByteArray(ID_SAVED_INSTANCE_STATE_BITMAP);
+         boolean border = savedInstanceState.getBoolean(ID_SAVED_INSTANCE_STATE_BORDER);
+         boolean light = savedInstanceState.getBoolean(ID_SAVED_INSTANCE_STATE_LIGHT);
+         boolean gaussian = savedInstanceState.getBoolean(ID_SAVED_INSTANCE_STATE_GAUSSIAN);
+         float rotate = savedInstanceState.getFloat(ID_SAVED_INSTANCE_STATE_ROTATE);
+         int filters = savedInstanceState.getInt(ID_SAVED_INSTANCE_STATE_FILTER);
+
+         try {
+            isBorder = border ? border : isBorder;
+            isLight = light ? light : isLight;
+            isGaussian = gaussian ? gaussian : isGaussian;
+            isRotate = rotate > 0 ? rotate : isRotate;
+            isRotate = rotate > 0 ? rotate : isRotate;
+            isActiveFilters = filters;
+            if(isActiveFilters != R.id.button_effect_real) {
+               onClick(getActivity().findViewById(isActiveFilters));
+            } else {
+               updateFiltersButtons(isActiveFilters, R.id.button_effect_real);
+            }
+            if(img_tmp != null) {
+               imageBitmap = imageBitmap_ = imageBitmap_active = (Bitmap) BitmapFactory.decodeByteArray(img_tmp , 0, img_tmp.length);
+            }
+         } catch (Error ignored){}
+         updateActiveTopNav();
+         updateImageToView(imageBitmap_);
+      }
+      setImage();
    }
 
    public void onClick(View v) {
@@ -490,9 +554,27 @@ public class FiltersEditorFragment extends ImageFragment implements View.OnClick
       return true;
    }
 
-   @Override
    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+      getActivity().getMenuInflater().inflate(R.menu.action_bar, menu);
       super.onCreateOptionsMenu(menu, inflater);
+   }
+
+   @Override
+   public boolean onOptionsItemSelected(MenuItem item) {
+      switch (item.getItemId()) {
+         case android.R.id.home:
+            Intent upIntent = new Intent(getActivity(), MainActivity.class);
+            if (NavUtils.shouldUpRecreateTask(getActivity(), upIntent)) {
+               TaskStackBuilder.from(getActivity())
+                       .addNextIntent(upIntent)
+                       .startActivities();
+            } else {
+               NavUtils.navigateUpTo(getActivity(), upIntent);
+            }
+            return true;
+         default:
+            return super.onOptionsItemSelected(item);
+      }
    }
 
    @Override
@@ -571,9 +653,11 @@ public class FiltersEditorFragment extends ImageFragment implements View.OnClick
       }
    }
 
-   public static FiltersEditorFragment newInstance() {
+   public static FiltersEditorFragment newInstance(byte [] image) {
       Bundle args = new Bundle();
-      //args.putSerializable(EXTRA_CRIME_ID, crimeId);
+      if(image != null) {
+         args.putByteArray(ID_SAVED_INSTANCE_STATE_BITMAP, image);
+      }
       FiltersEditorFragment fragment = new FiltersEditorFragment();
       fragment.setArguments(args);
       return fragment;
